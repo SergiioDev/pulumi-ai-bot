@@ -3,6 +3,7 @@ package com.example.config
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addResourceSource
 import com.sksamuel.hoplite.hocon.HoconParser
+import java.nio.file.Path
 
 
 object ConfigHolder {
@@ -10,7 +11,7 @@ object ConfigHolder {
 }
 
 
-data class Config(val port: Int)
+data class Config(val pulumiProjectDir: String, val anthropicKey: String)
 
 inline fun <reified T : Any> load(): T =
     ConfigLoaderBuilder.default()
