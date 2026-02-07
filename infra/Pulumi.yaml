@@ -4,7 +4,7 @@ description: A demo S3 bucket deployed by an AI agent
 
 config:
   aws:region:
-    default: us-east-1
+    value: eu-west-1
 
 resources:
   demo-bucket:

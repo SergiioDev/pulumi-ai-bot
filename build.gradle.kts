@@ -11,7 +11,7 @@ group = "com.example"
 version = "0.0.1"
 
 application {
-    mainClass = "com.example.PulumiAgent"
+    mainClass = "com.example.PulumiAgentKt"
 }
 
 kotlin {
@@ -24,6 +24,7 @@ dependencies {
     // config
     implementation("com.sksamuel.hoplite:hoplite-core:2.9.0")
     implementation("com.sksamuel.hoplite:hoplite-hocon:2.9.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.2")
 
     // ai agent
     implementation("ai.koog:koog-agents:0.6.1")
