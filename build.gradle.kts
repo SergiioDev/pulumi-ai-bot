@@ -24,12 +24,17 @@ dependencies {
     // config
     implementation("com.sksamuel.hoplite:hoplite-core:2.9.0")
     implementation("com.sksamuel.hoplite:hoplite-hocon:2.9.0")
+
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.2")
 
     // ai agent
     implementation("ai.koog:koog-agents:0.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+
+    // pulumi
+    implementation("com.pulumi:pulumi:[1.3,2.0)")
+    implementation("com.pulumi:aws:6.68.0")
 
     // test
     testImplementation("io.ktor:ktor-server-test-host")
