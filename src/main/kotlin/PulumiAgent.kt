@@ -10,6 +10,7 @@ import ai.koog.prompt.executor.clients.anthropic.AnthropicModels
 import ai.koog.prompt.executor.llms.all.simpleAnthropicExecutor
 import com.example.config.ConfigHolder.config
 import com.example.tools.PulumiTools
+import com.example.utils.checkPulumiInstalled
 import kotlinx.coroutines.runBlocking
 
 private val SYSTEM_PROMPT = """
