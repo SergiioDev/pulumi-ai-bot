@@ -43,7 +43,6 @@ fun main() = runBlocking {
         toolRegistry = ToolRegistry {
             tools(
                     PulumiTools(
-                    awsConfig = config.aws,
                     s3Runtime = S3RuntimeImpl(),
                     stackRuntime = StackRuntimeImpl()
                     ).asTools()
