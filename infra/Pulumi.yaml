@@ -1,0 +1,19 @@
+name: s3-bucket-demo
+runtime: yaml
+description: A demo S3 bucket deployed by an AI agent
+
+config:
+  aws:region:
+    default: us-east-1
+
+resources:
+  demo-bucket:
+    type: aws:s3:BucketV2
+    properties:
+      tags:
+        Name: pulumi-ai-demo
+        ManagedBy: pulumi
+
+outputs:
+  bucketName: ${demo-bucket.bucket}
+  bucketArn: ${demo-bucket.arn}
