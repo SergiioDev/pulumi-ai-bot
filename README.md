@@ -8,7 +8,7 @@ The agent follows a safe deployment workflow: **preview changes → show plan �
 
 ## Prerequisites
 
-- **JDK 21+** — [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-21-ug/downloads-list.html) or any OpenJDK distribution
+- **JDK 23+**
 - **Pulumi CLI** — [Install guide](https://www.pulumi.com/docs/install/)
 - **AWS account** with an IAM user (see below)
 - **Anthropic API key** — [Get one here](https://console.anthropic.com/settings/keys)
@@ -30,7 +30,7 @@ The agent needs an IAM user with permissions to create and delete S3 buckets.
 pulumi login
 ```
 
-This requires a [Pulumi account](https://app.pulumi.com/signup). Alternatively, use local state with `pulumi login --local`.
+This requires a [Pulumi account](https://app.pulumi.com/signup)
 
 ### 3. Configure the `.env` file
 
@@ -66,7 +66,7 @@ The agent will:
 
 ## Tech stack
 
-- **Kotlin 2.3** + **JDK 21**
+- **Kotlin 2.3** + **JDK 23**
 - **Koog 0.6.1** — JetBrains AI agent framework
 - **Pulumi Java SDK** — Infrastructure as Code (Automation API)
 - **Anthropic Claude** — LLM provider
