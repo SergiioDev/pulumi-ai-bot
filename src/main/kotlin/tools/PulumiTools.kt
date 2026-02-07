@@ -12,7 +12,6 @@ import java.util.*
 const val PROJECT_NAME = "pulumi-ai-bot"
 @LLMDescription("Tools for deploying and managing AWS S3 buckets using Pulumi")
 class PulumiTools(
-    private val awsConfig: AwsConfig,
     private val s3Runtime: S3Runtime,
     private val stackRuntime: StackRuntime
 ) : ToolSet {

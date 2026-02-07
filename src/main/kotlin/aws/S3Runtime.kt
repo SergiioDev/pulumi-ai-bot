@@ -1,10 +1,8 @@
 package com.example.aws
 
 import com.pulumi.Context
-import com.pulumi.aws.s3.Bucket
 import com.pulumi.aws.s3.BucketV2
 import com.pulumi.aws.s3.BucketV2Args
-import com.pulumi.core.Output
 import java.util.function.Consumer
 
 interface S3Runtime {
