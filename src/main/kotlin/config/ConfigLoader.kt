@@ -1,7 +1,6 @@
 package com.example.config
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
-import com.sksamuel.hoplite.addEnvironmentSource
 import com.sksamuel.hoplite.addMapSource
 import com.sksamuel.hoplite.addResourceSource
 import com.sksamuel.hoplite.hocon.HoconParser
@@ -12,7 +11,8 @@ val ENV_KEY_MAPPING = mapOf(
     "AWS_SECRET_ACCESS_KEY" to "aws.secretAccessKey",
     "AWS_SESSION_TOKEN" to "aws.sessionToken",
     "ANTHROPIC_KEY" to "anthropicKey",
-)
+    "STACK_NAME" to "stackName"
+ )
 
 inline fun <reified T : Any> load(): T {
     val env = dotenv { ignoreIfMissing = true }

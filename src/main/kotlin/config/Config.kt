@@ -9,9 +9,14 @@ data class AwsConfig(
     val secretAccessKey: String,
 )
 
+data class PulumiConfig(
+    val stackName: String,
+)
+
 data class Config(
     val anthropicKey: String,
     val aws: AwsConfig,
+    val pulumi: PulumiConfig
 )
 
 fun AwsConfig.toPulumiEnvVars(): Map<String, String> = buildMap {
