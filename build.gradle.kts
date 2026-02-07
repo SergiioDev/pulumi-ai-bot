@@ -15,7 +15,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(23)
 }
 
 tasks.named<JavaExec>("run") {
@@ -33,7 +33,11 @@ dependencies {
 
     // ai agent
     implementation("ai.koog:koog-agents:0.6.1")
+
+    // coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+
+    // serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
     // pulumi

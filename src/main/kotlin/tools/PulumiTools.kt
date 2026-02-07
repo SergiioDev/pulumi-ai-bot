@@ -5,7 +5,9 @@ import ai.koog.agents.core.tools.annotations.Tool
 import ai.koog.agents.core.tools.reflect.ToolSet
 import com.example.aws.S3Runtime
 import com.example.stack.StackRuntime
-import com.pulumi.automation.*
+import com.example.stack.destroyAndLog
+import com.example.stack.previewAndLog
+import com.example.stack.upAndLog
 import java.util.*
 
 const val PROJECT_NAME = "pulumi-ai-bot"
@@ -14,9 +16,6 @@ class PulumiTools(
     private val s3Runtime: S3Runtime,
     private val stackRuntime: StackRuntime
 ) : ToolSet {
-    private lateinit var lastPreviewedRegion: String
-    private lateinit var lastPreviewedBucketName: String
-
     @Tool
     @LLMDescription(
         """
@@ -28,9 +27,8 @@ class PulumiTools(
         @LLMDescription("AWS region, e.g. us-east-1, eu-west-1") region: String,
         @LLMDescription("Name for the s3 bucket (a UUID suffix will be appended automatically)") bucketName: String
     ): String {
-        val uniqueName = "$bucketName-${UUID.randomUUID()}"
-        lastPreviewedRegion = region
-        lastPreviewedBucketName = uniqueName
+        val suffix = UUID.randomUUID().toString().take(8)
+        val uniqueName = "$bucketName-${suffix}"
 
         val bucket = s3Runtime.createBucket(uniqueName)
 
@@ -39,7 +37,7 @@ class PulumiTools(
             region = region
         )
 
-        val previewResult = stack.preview()
+        val previewResult = stack.previewAndLog()
 
         stack.close()
 
@@ -56,18 +54,22 @@ class PulumiTools(
 
     @Tool
     @LLMDescription("Deploy S3 bucket to AWS. Only call this after the user has confirmed — no parameters needed since the region and bucket name are stored")
-    fun deploy(): String {
-        val bucket = s3Runtime.createBucket(lastPreviewedBucketName)
+    fun deploy(
+        @LLMDescription("The exact unique bucket name returned by the preview tool") bucketName: String,
+        @LLMDescription("The AWS region used in the preview") region: String
+    )
+    : String {
+        val bucket = s3Runtime.createBucket(bucketName)
 
         val stack = stackRuntime.createOrSelectStack(
             program = s3Runtime.defineBucketResource(
-                lastPreviewedBucketName,
+                bucketName,
                 bucket
             ),
-            region = lastPreviewedRegion
+            region = region
         )
 
-        val result = stack.up()
+        val result = stack.upAndLog()
 
         stack.close()
 
@@ -85,22 +87,22 @@ class PulumiTools(
 
     @Tool
     @LLMDescription("Destroy all S3 infrastructure in the current stack. Only call this if the user explicitly asks to tear down resources.")
-    fun destroy(): String {
-        val bucket = s3Runtime.createBucket(lastPreviewedBucketName)
+    fun destroy(
+        @LLMDescription("Bucket name that the user wants to destroy") bucketName: String,
+        @LLMDescription("Region name of the bucket, can be the one that the preview returned if not is specified for the user") region: String,
+    ): String {
+        val bucket = s3Runtime.createBucket(bucketName)
 
         val stack = stackRuntime.createOrSelectStack(
             program = s3Runtime.defineBucketResource(
-                lastPreviewedBucketName,
-                bucket
+                resourceName = bucketName,
+                bucketDefinition = bucket
             ),
-            region = lastPreviewedRegion
+            region = region
         )
 
-        val result = stack.destroy(
-            DestroyOptions.builder()
-                .onStandardOutput(System.out::println)
-                .build()
-        )
+
+        val result = stack.destroyAndLog()
 
         stack.close()
 

@@ -1,10 +1,13 @@
 package com.example
 
 import ai.koog.agents.core.agent.AIAgentService
+import ai.koog.agents.core.agent.context.RollbackStrategy
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.tools.reflect.asTools
 import ai.koog.agents.ext.agent.chatAgentStrategy
 import ai.koog.agents.ext.tool.AskUser
+import ai.koog.agents.snapshot.feature.Persistence
+import ai.koog.agents.snapshot.providers.InMemoryPersistenceStorageProvider
 import ai.koog.prompt.executor.clients.anthropic.AnthropicModels
 import ai.koog.prompt.executor.llms.all.simpleAnthropicExecutor
 import com.example.aws.S3RuntimeImpl
@@ -27,9 +30,9 @@ private val SYSTEM_PROMPT = """
     summary to the user of what you just did.
     
     Rules:
-    1. Ask the user for the AWS region and bucket name if they haven't provided them
-    2. Run a preview first to see what changes will be made.
-    3. If the user confirms, run the deployment.
+    - Ask the user for the AWS region and bucket name if they haven't provided them
+    - Before deleting adding/deleting resources **always run a preview** first.
+    - If the user confirms, run the deployment.
 """.trimIndent()
 
 fun main() = runBlocking {
@@ -47,22 +50,19 @@ fun main() = runBlocking {
                     stackRuntime = StackRuntimeImpl()
                     ).asTools()
             )
-            //tool(SayToUser)
             tool(AskUser)
         },
-        maxIterations = 20
-    )
+        maxIterations = 1000
+    ) {
+        install(Persistence) {
+            storage = InMemoryPersistenceStorageProvider()
+            enableAutomaticPersistence = true
+            rollbackStrategy = RollbackStrategy.MessageHistoryOnly
+        }
+    }.createAgent()
 
-    println("Pulumi AI Agent ready. Type your request (or 'exit' to quit):")
-    while (true) {
-        print("\n> ")
-        val input = readlnOrNull()?.trim() ?: break
+    println("")
 
-        if (input.equals("exit", ignoreCase = true)) break
-
-        if (input.isEmpty()) continue
-
-        val result = agentService.createAgentAndRun(input)
-        println(result)
-    }
+    val result = agentService.run("Hello! I'm ready to help you manage AWS S3 buckets.")
+    println(result)
 }
