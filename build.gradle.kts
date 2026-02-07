@@ -18,6 +18,10 @@ kotlin {
     jvmToolchain(21)
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
 dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
 

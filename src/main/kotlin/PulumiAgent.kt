@@ -19,6 +19,8 @@ private val SYSTEM_PROMPT = """
     This is a proof of concept. Your scope is limited to S3 bucket operations only (deploy, preview, destroy).
     If the user asks about other resource types, let them know this POC only supports S3 buckets.
 
+    To help the user, if he wants to create a resource inside a region please show all the available aws regions
+
     Follow this workflow strictly:
     1. Ask the user for the AWS region and bucket name if they haven't provided them
     2. Run a preview first to see what changes will be made

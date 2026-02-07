@@ -10,18 +10,19 @@ The agent follows a safe deployment workflow: **preview changes → show plan �
 
 - **JDK 21+** — [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-21-ug/downloads-list.html) or any OpenJDK distribution
 - **Pulumi CLI** — [Install guide](https://www.pulumi.com/docs/install/)
-- **AWS CLI** — [Install guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- **AWS account** with an IAM user (see below)
 - **Anthropic API key** — [Get one here](https://console.anthropic.com/settings/keys)
 
 ## Setup
 
-### 1. Log in to AWS
+### 1. Create an IAM user
 
-```bash
-aws configure
-```
+The agent needs an IAM user with permissions to create and delete S3 buckets.
 
-You'll need an AWS account with permissions to create S3 buckets.
+1. Go to the [IAM Console](https://console.aws.amazon.com/iam/) > **Users** > **Create user**
+2. Attach the `AmazonS3FullAccess` policy
+3. Go to **Security credentials** > **Create access key** > select **Command Line Interface (CLI)**
+4. Copy the **Access key ID** and **Secret access key**
 
 ### 2. Log in to Pulumi
 
@@ -31,53 +32,42 @@ pulumi login
 
 This requires a [Pulumi account](https://app.pulumi.com/signup). Alternatively, use local state with `pulumi login --local`.
 
-### 3. Initialize the Pulumi stack
+### 3. Configure the `.env` file
 
-```bash
-cd infra
-pulumi stack init dev
+Create a `.env` file in the project root:
+
+```env
+ANTHROPIC_KEY=sk-ant-...
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=wJalr...
 ```
 
-### 4. Set the Anthropic API key
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-```
-
-### 5. (Optional) Override the Pulumi project directory
-
-By default, the agent uses the `infra/` directory in this repo. To point to a different Pulumi project:
-
-```bash
-export PULUMI_PROJECT_DIR=/path/to/your/pulumi/project
-```
-
-## Running the agent
+### 4. Running the agent
 
 ```bash
 ./gradlew run --console=plain
 ```
 
-The agent will start an interactive session where you can ask it to deploy, preview, or destroy infrastructure.
+The agent will start an interactive session where you can ask it to deploy, preview, or destroy S3 buckets.
 
-### Example session
+## Example session
 
 ```
 Pulumi AI Agent ready. Type your request (or 'exit' to quit):
 
-> Deploy an S3 bucket
+> Deploy an S3 bucket in eu-west-1
 ```
 
 The agent will:
-1. Run `pulumi preview` and show you what will be created
-2. Ask for your confirmation before proceeding
-3. Run `pulumi up` to deploy
-4. Show a summary of the deployment results
+1. Ask for the bucket name if not provided
+2. Run a preview and show what will be created
+3. Ask for your confirmation before proceeding
+4. Deploy the bucket and show the results
 
 ## Tech stack
 
 - **Kotlin 2.3** + **JDK 21**
 - **Koog 0.6.1** — JetBrains AI agent framework
-- **Pulumi (YAML)** — Infrastructure as Code
+- **Pulumi Java SDK** — Infrastructure as Code (Automation API)
 - **Anthropic Claude** — LLM provider
 - **Hoplite** — HOCON configuration

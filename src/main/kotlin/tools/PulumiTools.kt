@@ -16,11 +16,11 @@ const val STACK_NAME = "dev"
 
 @LLMDescription("""
     Tools for deploying and managing AWS S3 buckets using Pulumi.
-    
-    To help the user, if he wants to create a resource inside a region please show all the available aws regions
-    to help him.
 """)
 class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
+
+    private var lastPreviewedRegion: String? = null
+    private var lastPreviewedBucketName: String? = null
 
     private fun createStack(region: String, bucketName: String): WorkspaceStack {
         val options = LocalWorkspaceOptions.builder()
@@ -30,6 +30,7 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
         val stack = LocalWorkspace.createOrSelectStack(
             PROJECT_NAME, STACK_NAME,
             { ctx: com.pulumi.Context ->
+
                 val bucket = BucketV2(
                     "demo-bucket", BucketV2Args.builder()
                         .bucket(bucketName)
@@ -42,7 +43,6 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
                         .build()
                 )
                 ctx.export("bucketName", bucket.bucket())
-                ctx.export("bucketArn", bucket.arn())
             },
             options
         )
@@ -52,12 +52,14 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
     }
 
     @Tool
-    @LLMDescription("Preview S3 bucket deployment. Shows what will be created, updated, or deleted without making changes.")
+    @LLMDescription("Preview S3 bucket deployment. Shows what will be created, updated, or deleted without making changes. Returns the generated unique bucket name — remember it for deploy.")
     fun preview(
         @LLMDescription("AWS region, e.g. us-east-1, eu-west-1") region: String,
-        @LLMDescription("Name for the s3 bucket") bucketName: String
+        @LLMDescription("Name for the s3 bucket (a UUID suffix will be appended automatically)") bucketName: String
     ): String {
         val uniqueName = "$bucketName-${UUID.randomUUID()}"
+        lastPreviewedRegion = region
+        lastPreviewedBucketName = uniqueName
 
         return createStack(region, uniqueName).use { stack ->
             val result = stack.preview(
@@ -67,6 +69,8 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
             )
             buildString {
                 appendLine("Preview complete:")
+                appendLine("Bucket name: $uniqueName")
+                appendLine("Region: $region")
                 result.changeSummary().forEach { (op, count) ->
                     appendLine("  $op: $count")
                 }
@@ -75,11 +79,11 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
     }
 
     @Tool
-    @LLMDescription("Deploy S3 bucket to AWS. Only call this after the user has confirmed they want to proceed.")
-    fun deploy(
-        @LLMDescription("AWS region, e.g. us-east-1, eu-west-1") region: String,
-        @LLMDescription("Globally unique name for the S3 bucket") bucketName: String
-    ): String {
+    @LLMDescription("Deploy S3 bucket to AWS. Only call this after the user has confirmed — no parameters needed since the region and bucket name are stored")
+    fun deploy(): String {
+        val region = lastPreviewedRegion ?: return "Error: run a preview first before deploying."
+        val bucketName = lastPreviewedBucketName ?: return "Error: run a preview first before deploying."
+
         return createStack(region, bucketName).use { stack ->
             val result = stack.up(
                 UpOptions.builder()
@@ -117,22 +121,4 @@ class PulumiTools(private val awsConfig: AwsConfig) : ToolSet {
             "Stack destroyed successfully"
         }
     }
-
-/*    @Tool
-    @LLMDescription("Destroy an s3 bucket. Only call this if the user explicitly asks to destroy/tear down an s3 bucket.")
-    fun destroyBucket(bucketName: String): String {
-        val options = LocalWorkspaceOptions.builder()
-            .environmentVariables(awsEnvVars())
-            .build()
-        return LocalWorkspace.createOrSelectStack(
-            PROJECT_NAME, STACK_NAME, { _: com.pulumi.Context -> }, options
-        ).use { stack ->
-            stack.destroy(
-                DestroyOptions.builder()
-                    .onStandardOutput(System.out::println)
-                    .build()
-            )
-            "Stack destroyed successfully"
-        }
-    }*/
 }
