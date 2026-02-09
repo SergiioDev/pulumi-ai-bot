@@ -35,7 +35,19 @@ private val SYSTEM_PROMPT = """
     - If the user confirms, run the deployment.
 """.trimIndent()
 
+private val BANNER = """
+    ${"\u001B[38;5;135m"}
+     ____        _                   _                _         _           _
+    |  _ \  _   | | _   _  _ __ ___ (_)        __ _  (_)       | |__   ___ | |_
+    | |_) || | | | || | | || '_ ` _ \| |____  / _` | | | _____ | '_ \ / _ \| __|
+    |  __/ | |_| | || |_| || | | | | | |____|( (_| | | ||_____|| |_) || (_) | |_
+    |_|     \__,_|_| \__,_||_| |_| |_|_|      \__,_| |_|      |_.__/  \___/ \__|
+    ${"\u001B[0m"}
+""".trimIndent()
+
 fun main() = runBlocking {
+    println(BANNER)
+
     val executor = simpleAnthropicExecutor(apiKey = config.anthropicKey)
 
     val agentService = AIAgentService(
@@ -61,8 +73,8 @@ fun main() = runBlocking {
         }
     }.createAgent()
 
-    println("")
+    val userInput = readln()
 
-    val result = agentService.run("Hello! I'm ready to help you manage AWS S3 buckets.")
+    val result = agentService.run(userInput)
     println(result)
 }

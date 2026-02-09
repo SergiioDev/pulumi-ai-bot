@@ -1,6 +1,7 @@
 package com.example.config
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addMapSource
 import com.sksamuel.hoplite.addResourceSource
 import com.sksamuel.hoplite.hocon.HoconParser
@@ -14,6 +15,7 @@ val ENV_KEY_MAPPING = mapOf(
     "STACK_NAME" to "stackName"
  )
 
+@OptIn(ExperimentalHoplite::class)
 inline fun <reified T : Any> load(): T {
     val env = dotenv { ignoreIfMissing = true }
         .entries()
@@ -22,6 +24,7 @@ inline fun <reified T : Any> load(): T {
     return ConfigLoaderBuilder.default()
         .addParser("conf", HoconParser())
         .addMapSource(env)
+        .withExplicitSealedTypes()
         .addResourceSource("/application.conf")
         .build()
         .loadConfigOrThrow()
